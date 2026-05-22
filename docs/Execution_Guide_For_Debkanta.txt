@@ -1,0 +1,152 @@
+================================================================================
+DIFFUSION VS AUTO-REGRESSIVE MODELS FOR HINDI NLP
+COMPREHENSIVE EXECUTION & DEEP COMPARISON GUIDE
+================================================================================
+
+Prepared For: Prof. Debkanta Chakraborty
+Prepared By: Aditya Bhatia, Tanish Anand, Pavitra Kushwaha
+Date: May 2026
+
+This document provides a complete technical walkthrough of the codebase, detailing 
+how to deploy the experiments, what resources are required, how the internal 
+pipelines operate, and how to execute deep analytical comparisons across the 
+8-model × 4-task × 5-step matrix.
+
+--------------------------------------------------------------------------------
+1. PROJECT ARCHITECTURE & WORKFLOW
+--------------------------------------------------------------------------------
+The project is built with a highly modular architecture designed to support both 
+Auto-Regressive (AR) and Diffusion paradigms under a unified interface.
+
+Workflows:
+1. Data Loading: `src/data/data_loader.py` dynamically fetches datasets from 
+   HuggingFace or falls back to realistic Hindi samples.
+2. Model Wrappers: `src/models/` contains wrappers that abstract away the extreme 
+   differences between AR (causal generation) and Diffusion (iterative denoising).
+3. Pipelines: `src/pipelines/fine_tuning.py` and `src/rag/rag_chain.py` handle 
+   adaptation. Diffusion fine-tuning uses custom denoising loss loops, while AR 
+   uses QLoRA.
+4. Evaluation: `src/evaluation/metrics.py` calculates BLEU, ROUGE, BERTScore, 
+   Perplexity, and classification metrics (Accuracy, F1).
+5. Orchestration: `experiments/run_all_experiments.py` handles the full 160-experiment 
+   matrix with automatic recovery and plotting.
+
+--------------------------------------------------------------------------------
+2. ENVIRONMENT SETUP & REQUIRED DOWNLOADS
+--------------------------------------------------------------------------------
+To run this on the main server (172.31.100.251), the following must be set up:
+
+A. System Requirements:
+- Python 3.10+
+- CUDA 11.8+ / 12.1+ compatible GPUs (e.g., A100/H100 for 8B+ models)
+- ~250GB Disk Space (for model weights and datasets)
+
+B. Installation:
+1. Create a virtual environment: `python -m venv venv && source venv/bin/activate`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Install visualization libraries (optional but recommended): `pip install matplotlib seaborn`
+
+C. HuggingFace Authentication (Required):
+The models (especially LLaMA 3 and Gemma 2) are gated. 
+1. Run `huggingface-cli login`
+2. Enter your HF token (ensure you have accepted the agreements for Meta-Llama-3 and Gemma).
+
+D. Required Downloads (Automatic via Script):
+The codebase is designed to auto-download these, but they will be cached in `~/.cache/huggingface/`:
+- Datasets:
+  * cfilt/iitb-english-hindi (Translation)
+  * csebuetnlp/xlsum (Summarization)
+  * Exploration-Lab/HLDC (Bail Prediction - requires manual license acceptance on HF)
+- AR Models:
+  * meta-llama/Meta-Llama-3-8B-Instruct
+  * google/gemma-2-9b-it
+  * mistralai/Mistral-7B-Instruct-v0.3
+  * ai4bharat/indic-bert
+- Diffusion Models:
+  * Sedd/LLaDA weights (will be pulled based on HF config in `model_configs.py`)
+
+--------------------------------------------------------------------------------
+3. HOW TO EXECUTE EXPERIMENTS
+--------------------------------------------------------------------------------
+The project features a priority-based execution system so you don't have to wait 
+for all 160 experiments to finish to see results.
+
+Command 1: Run a Single Test Experiment
+Use this to verify everything is working:
+$ python experiments/run_experiment.py --model llama --task hindi_translation --pipeline zero_shot
+
+Command 2: Run the Priority Matrix (Phase 1)
+This runs the core 4 models (SEDD, LLaDA, LLaMA, Gemma) across all tasks:
+$ python experiments/run_all_experiments.py --priority-only
+
+Command 3: Run the Full Matrix (Phase 2)
+This executes the entire 8x4x5 matrix (WARNING: Takes significant GPU time):
+$ python experiments/run_all_experiments.py --full
+
+Command 4: Custom Runs
+$ python experiments/run_all_experiments.py --models sedd mistral --tasks bail translation
+
+--------------------------------------------------------------------------------
+4. HOW TO COMPARE MODELS DEEPLY
+--------------------------------------------------------------------------------
+The framework automatically generates comprehensive comparison artifacts.
+
+A. The Aggregated Metrics File
+Location: `results/metrics/aggregated/all_results.json`
+What it is: A massive JSON dump containing the exact metrics, generation times, 
+and hyperparameter states for every run. Use this for programmatic deep dives.
+
+B. The Comparison Report
+Location: `results/metrics/aggregated/comparison_report.md`
+What it is: A markdown document that automatically cross-tabulates Diffusion vs AR 
+models across all 5 pipeline steps. Perfect for pasting directly into the research paper.
+
+C. Visual Dashboards (Publication Quality)
+Location: `results/figures/`
+The `src/utils/visualization.py` module automatically generates:
+1. `comparison_heatmaps/`: Heatmaps showing primary metric (e.g., BLEU) for all 
+   models across all tasks.
+2. `bar_charts/`: Grouped bar charts distinctly separating Diffusion (Red tones) 
+   and AR (Teal tones) for easy visual comparison.
+3. `summary_dashboard.png`: A single-page mega-dashboard combining heatmaps, 
+   progression curves, and key findings.
+
+--------------------------------------------------------------------------------
+5. PIPELINE ADAPTATION DETAILS
+--------------------------------------------------------------------------------
+To deeply analyze *how* the models learn, observe the pipeline progression:
+
+- 0-Shot vs Few-Shot: Look at `results/raw/<task>/<model>/few_shot/raw_output.json`.
+  Does the diffusion model (e.g., SEDD) successfully map the 5 prompt examples to 
+  its iterative denoising context as well as LLaMA maps it to causal attention?
+
+- Fine-Tuning (The biggest technical differentiator):
+  AR models use QLoRA (Parameter Efficient Fine-Tuning) via `peft`.
+  Diffusion models use our custom denoising loss training loop in `src/pipelines/fine_tuning.py`. 
+  Compare `total_training_time_seconds` and `final_loss` in the `training_results.json`.
+
+- RAG (Retrieval-Augmented Generation):
+  Uses `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` and FAISS.
+  Deep comparison point: How do Diffusion models handle the sudden injection of 
+  long retrieved context vs AR models? Check the `num_tokens_generated` vs `generation_time` metrics.
+
+--------------------------------------------------------------------------------
+6. TROUBLESHOOTING ON THE SERVER
+--------------------------------------------------------------------------------
+1. CUDA Out Of Memory (OOM): 
+   - LLaDA (8B) and LLaMA (8B) run in 4-bit quantization by default (`load_in_4bit=True`). 
+   - If you encounter OOM during fine-tuning, reduce `batch_size` in `fine_tuning.py` 
+     from 4 to 2 or 1, and increase `gradient_accumulation_steps`.
+
+2. Diffusion Generation is Too Slow:
+   - Diffusion requires multiple forward passes. D3PM and SEDD default to 64-100 steps.
+   - You can lower this by passing `--max_new_tokens 128` or editing the `diffusion_steps` 
+     in the model configs to trade quality for speed.
+
+3. HuggingFace Login Fails / Dataset Errors:
+   - Ensure you are passing the HF token if requested, or use the fallback sample 
+     data mechanism we built into `data_loader.py` to test the pipeline locally first.
+
+================================================================================
+END OF GUIDE
+================================================================================

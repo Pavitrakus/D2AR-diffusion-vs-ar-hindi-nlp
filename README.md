@@ -2,7 +2,7 @@
 
 > **A comprehensive PhD research project comparing Text Diffusion Models against Auto-Regressive Models across Hindi NLP tasks**
 
-**Principal Investigator:** Prof. Debkanta Chakraborty, Georgia Institute of Technology  
+**Principal Investigator:** Prof. Debkanta Chakraborty  
 **Research Team:** Aditya Bhatia, Tanish Anand, Pavitra Kushwaha
 
 ---

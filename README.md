@@ -2,7 +2,6 @@
 
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue) ![PyTorch 2.1](https://img.shields.io/badge/pytorch-2.1-orange) ![License: Research](https://img.shields.io/badge/license-research--use-lightgrey)
 
-**Principal Investigator:** Prof. Debkanta Chakraborty (IIT Kanpur)
 **Research team:** Aditya Bhatia, Tanish Anand, Pavitra Kushwaha
 
 D2AR is a systematic, reproducible benchmark that compares eight open language models from two generation paradigms, text diffusion and autoregressive decoding, on four Hindi NLP tasks across a five-stage adaptation protocol. The repository provides a unified evaluation harness that exposes heterogeneous architectures through a single model interface, and emits the full set of raw outputs, metrics, comparison reports, and publication-grade figures for the complete 8 x 4 x 5 experiment matrix.
@@ -239,6 +238,6 @@ If you use this repository in your research, please cite it as:
 
 ## License and acknowledgements
 
-This repository is released for academic research purposes under the supervision of Prof. Debkanta Chakraborty. The base models and datasets retain their respective licenses; please verify access terms for the gated checkpoints (LLaMA 3, Gemma 2) and the HLDC corpus before use.
+This repository is released for academic research purposes. The base models and datasets retain their respective licenses; please verify access terms for the gated checkpoints (LLaMA 3, Gemma 2) and the HLDC corpus before use.
 
 The benchmark builds on the work of the authors of SEDD (Stanford), LLaDA (Renmin University of China), D3PM (Google Research), Diffusion-LM (Stanford), LLaMA (Meta AI), Gemma (Google DeepMind), Mistral (Mistral AI), and IndicBERT (AI4Bharat), and on the IIT Bombay parallel corpus (CFILT), the Hindi Legal Documents Corpus (Exploration Lab), and XL-Sum (BBC Hindi). Compute was provided by the research infrastructure at IIT Kanpur.

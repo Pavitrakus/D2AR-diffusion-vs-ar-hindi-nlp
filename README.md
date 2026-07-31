@@ -2,7 +2,7 @@
 
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue) ![PyTorch 2.1](https://img.shields.io/badge/pytorch-2.1-orange) ![License: Research](https://img.shields.io/badge/license-research--use-lightgrey)
 
-**Principal Investigator:** Prof. Debkanta Chakraborty
+**Principal Investigator:** Prof. Debkanta Chakraborty (IIT Kanpur)
 **Research team:** Aditya Bhatia, Tanish Anand, Pavitra Kushwaha
 
 D2AR is a systematic, reproducible benchmark that compares eight open language models from two generation paradigms, text diffusion and autoregressive decoding, on four Hindi NLP tasks across a five-stage adaptation protocol. The repository provides a unified evaluation harness that exposes heterogeneous architectures through a single model interface, and emits the full set of raw outputs, metrics, comparison reports, and publication-grade figures for the complete 8 x 4 x 5 experiment matrix.
